@@ -30,47 +30,55 @@ Qtpcap::Qtpcap(QObject *parent) : QObject(parent)
         qDebug() << "Couldn't open device " << device << ":" << errbuf;
         qApp->quit();
     }
+
+    //all network devices
+    pcap_if_t *alldevsp;
+    if(pcap_findalldevs(&alldevsp, errbuf) == 0){
+        do{
+            devices.push_back(QString(alldevsp->name));
+        }while(alldevsp=alldevsp->next);
+    }
+    pcap_freealldevs(alldevsp);
 }
 
 void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u_char* packet)
 {
-    static int count;
-    qDebug() << count++;
-
-    qDebug() << count++;
-
+    qDebug() << pkthdr->caplen;
     Qtpcap* qtpcap = reinterpret_cast<Qtpcap *>(self);
-    u_char* pk = new u_char(pkthdr->caplen);
+    u_char *pk = new u_char[pkthdr->caplen];
     memcpy(pk, packet, pkthdr->caplen);
-    delete[] pk;
     qtpcap->packets.push_back(pk);
+    emit(qtpcap->onPacket(pkthdr, packet));
 }
 
 void Qtpcap::start()
 {
     int n = pcap_loop(handle,0,(pcap_handler)&Qtpcap::loop_callback,(uchar *)this);
     qDebug() << "this is loop return: " << n;
+
 }
 
 void Qtpcap::stop()
 {
-    if(!packets.empty()){
-        u_char* packet = packets[0];
-        int i = ETHER_ADDR_LEN;
-        qDebug() << " Destination Address:  ";
-        do{
-            qDebug(":%x", *packet++);
-        }while(--i>0);
-            qDebug();
+    pcap_breakloop(this->handle);
+//    if(!packets.empty()){
+//        u_char* packet = packets[0];
+//        int i = ETHER_ADDR_LEN;
+//        qDebug() << " Destination Address:  ";
+//        do{
+//            qDebug(":%x", *packet++);
+//        }while(--i>0);
+//            qDebug();
 
-        i = ETHER_ADDR_LEN;
-        qDebug() << " Source Address:  ";
-        do{
-            qDebug(":%x", *packet++);
-        }while(--i>0);
-            qDebug();
-    }
+//        i = ETHER_ADDR_LEN;
+//        qDebug() << " Source Address:  ";
+//        do{
+//            qDebug(":%x", *packet++);
+//        }while(--i>0);
+//            qDebug();
+//    }
 }
+
 
 
 

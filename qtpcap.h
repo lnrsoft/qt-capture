@@ -13,12 +13,13 @@ public:
     std::vector<u_char*> packets;
     static void loop_callback(u_char *args,const struct pcap_pkthdr* pkthdr,const u_char* packet);
     ~Qtpcap();
-signals:
+    std::vector<QString> devices;
 
+signals:
+    void onPacket(const struct pcap_pkthdr*, const u_char*);
 public slots:
     void start();
     void stop();
-
 
 private:
     pcap_t *handle;			/* Session handle */

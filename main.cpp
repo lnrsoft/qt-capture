@@ -5,8 +5,14 @@
 #include <QDebug>
 #include "qtpcap.h"
 #include <QtConcurrent>
-
+#include <QQuickView>
+#include <QQmlComponent>
+#include <QQmlProperty>
+#include <QVariant>
+#include <QAbstractItemModel>
+#include <QTableView>
 #include "threadcontrol.h"
+#include "binary.h"
 
 
 int main(int argc, char *argv[])
@@ -16,9 +22,18 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    ThreadControl* threadPcap = new ThreadControl;
 
-    engine.rootContext()->setContextProperty("_qtpcap", threadPcap);
+    ThreadControl threadPcap;
+    Binary binary;
+    QObject::connect(threadPcap.qtpcap, SIGNAL(onPacket(const struct pcap_pkthdr*, const u_char*)), &binary,
+                     SLOT(on_packet_received(const struct pcap_pkthdr*, const u_char*)));
+
+    QObject::connect(qApp, SIGNAL(aboutToQuit()), threadPcap.qtpcap, SLOT(stop()));
+
+
+    //engine.rootContext()->setContextProperty("_binary", QVariant::fromValue(&ls));
+    engine.rootContext()->setContextProperty("_qtpcap", &threadPcap);
+
     return app.exec();
 }
 

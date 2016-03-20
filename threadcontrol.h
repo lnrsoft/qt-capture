@@ -10,6 +10,8 @@ class ThreadControl : public QObject
     Q_OBJECT
 public:
     explicit ThreadControl(QObject *parent = 0);
+    Qtpcap* qtpcap;
+    QString aa="aaaaaaaaa";
 
 
 public slots:

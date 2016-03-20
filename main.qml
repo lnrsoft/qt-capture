@@ -21,6 +21,7 @@ ApplicationWindow {
             anchors.right: parent.right
             onClicked: _qtpcap.pcapStart()
         }
+
     }
 
     Rectangle {
@@ -35,7 +36,39 @@ ApplicationWindow {
             height: parent.height
             Tab {
                 title: "Binary"
-                source: "binary.qml"
+                //source: "binary.qml"
+                Rectangle {
+                    TableView {
+                        objectName: "binaryTable"
+                        anchors.fill: parent
+                        TableViewColumn {
+                            role: "number"
+                            title: "NO."
+                            width: 80
+                        }
+                        TableViewColumn {
+                            role: "content"
+                            title: "Content"
+                        }
+                        model: _binary
+                    }
+
+                    ListModel {
+                        id: libraryModel
+                        ListElement {
+                            number: "A Masterpiece"
+                            content: "Gabriel"
+                        }
+                        ListElement {
+                            number: "Brilliance"
+                            content: "Jens"
+                        }
+                        ListElement {
+                            number: "Outstanding"
+                            content: "asdfsfd"
+                        }
+                    }
+                }
             }
             Tab {
                 title: "Hexadecimal"
