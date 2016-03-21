@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     QObject::connect(threadPcap.qtpcap, SIGNAL(onPacket(const struct pcap_pkthdr*, const u_char*)), &binary,
                      SLOT(on_packet_received(const struct pcap_pkthdr*, const u_char*)));
 
-    QObject::connect(qApp, SIGNAL(aboutToQuit()), &threadPcap, SLOT(stop()));
+    QObject::connect(qApp, SIGNAL(aboutToQuit()), threadPcap.qtpcap, SLOT(stop()));
 
 
     //engine.rootContext()->setContextProperty("_binary", QVariant::fromValue(&ls));

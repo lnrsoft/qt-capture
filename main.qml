@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 
+
 ApplicationWindow {
     id: applicationWindow1
     visible: true
@@ -15,25 +16,25 @@ ApplicationWindow {
         color: "red"
         Button {
             id: startButton
-            property int started: 0
+            property bool started: false
             text: qsTr("Start")
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             onClicked: {
                 if(started){
                     _qtpcap.pcapStop();
-                    started = 0;
-                    //text = qsTr("Start");
+                    started = false;
+                    text = qsTr("Start");
                 }else{
                     _qtpcap.pcapStart();
-                    started = 1;
-                    //text = qsTr("Stop");
+                    started = true;
+                    text = qsTr("Stop");
                 }
             }
             Connections {
                 target: _qtpcap
                 onSend2qml: {
-                    console.log(count);
+                    jsonString = count;
                 }
             }
         }
@@ -42,10 +43,11 @@ ApplicationWindow {
             anchors.fill: parent.Center
             text: "add row"
             onClicked: {
-                listModel.append({"number":"999", "content":"888"})
+                listModel.append(JSON.parse(jsonString))
             }
         }
     }
+    property string jsonString: '{"number":"999", "content":"888"}'
 
     ListModel{
         id: listModel
