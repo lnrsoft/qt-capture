@@ -19,7 +19,7 @@ Binary::Binary(QObject *parent) : QAbstractTableModel(parent)
 void Binary::on_packet_received(const struct pcap_pkthdr* pkthdr, const u_char* packet)
 {
     QString bstring;
-    for(int n=0; n<pkthdr->caplen; ++n){
+    for(int n=0; n<int(pkthdr->caplen); ++n){
         for(u_char z=0b11111111; z>0; z>>=1){
             bstring += (((*packet & z) == z) ? "1" : "0");
         }
@@ -44,6 +44,7 @@ int Binary::columnCount(const QModelIndex &parent) const
 
 QVariant Binary::data(const QModelIndex &index, int role) const
 {
+    Q_UNUSED(role);
     qDebug() << "MyModel::data: " << index.column() << "; " << index.row();
 
     switch(index.column())

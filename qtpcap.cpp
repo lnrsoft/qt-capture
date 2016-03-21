@@ -36,7 +36,7 @@ Qtpcap::Qtpcap(QObject *parent) : QObject(parent)
     if(pcap_findalldevs(&alldevsp, errbuf) == 0){
         do{
             devices.push_back(QString(alldevsp->name));
-        }while(alldevsp=alldevsp->next);
+        }while((alldevsp=alldevsp->next));
     }
     pcap_freealldevs(alldevsp);
 }

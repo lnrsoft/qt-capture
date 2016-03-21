@@ -11,11 +11,13 @@ class ThreadControl : public QObject
 public:
     explicit ThreadControl(QObject *parent = 0);
     Qtpcap* qtpcap;
-    QString aa="aaaaaaaaa";
 
+signals:
+    void send2qml(int count);
 
 public slots:
     void pcapStart();
+    void pcapStop();
 };
 
 #endif // THREADCONTROL_H

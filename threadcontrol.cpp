@@ -8,5 +8,12 @@ ThreadControl::ThreadControl(QObject *parent) : QObject(parent),qtpcap(new Qtpca
 
 void ThreadControl::pcapStart()
 {
+    emit(send2qml(111));
     QFuture<void> pcap = QtConcurrent::run(qtpcap, &Qtpcap::start);
+}
+
+void ThreadControl::pcapStop()
+{
+    emit(send2qml(222));
+    qtpcap->stop();
 }

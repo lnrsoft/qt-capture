@@ -13,15 +13,50 @@ ApplicationWindow {
         width: parent.width
         height: 60
         color: "red"
-
         Button {
             id: startButton
+            property int started: 0
             text: qsTr("Start")
             anchors.bottom: parent.bottom
             anchors.right: parent.right
-            onClicked: _qtpcap.pcapStart()
+            onClicked: {
+                if(started){
+                    _qtpcap.pcapStop();
+                    started = 0;
+                    //text = qsTr("Start");
+                }else{
+                    _qtpcap.pcapStart();
+                    started = 1;
+                    //text = qsTr("Stop");
+                }
+            }
+            Connections {
+                target: _qtpcap
+                onSend2qml: {
+                    console.log(count);
+                }
+            }
         }
 
+        Button{
+            anchors.fill: parent.Center
+            text: "add row"
+            onClicked: {
+                listModel.append({"number":"999", "content":"888"})
+            }
+        }
+    }
+
+    ListModel{
+        id: listModel
+        ListElement{
+            number: "111"
+            content: "aaa"
+        }
+        ListElement{
+            number: "111"
+            content: "aaa"
+        }
     }
 
     Rectangle {
@@ -37,37 +72,44 @@ ApplicationWindow {
             Tab {
                 title: "Binary"
                 //source: "binary.qml"
-                Rectangle {
-                    TableView {
-                        objectName: "binaryTable"
-                        anchors.fill: parent
-                        TableViewColumn {
-                            role: "number"
-                            title: "NO."
-                            width: 80
+                TableView {
+                    //objectName: "binaryTable"
+                    anchors.fill: parent
+
+                    TableViewColumn {
+                        role: "number"
+                        title: "NO."
+                        width: 80
+                    }
+                    property bool isRowContChanged: false
+                    onRowCountChanged:{isRowContChanged=true}
+                    Timer {
+                        interval: 500; running: true; repeat: true
+                        onTriggered: {
+                            if(parent.isRowContChanged){
+                                positionViewAtRow(rowCount-1, ListView.End)
+                                parent.isRowContChanged = false
+                            }
                         }
-                        TableViewColumn {
-                            role: "content"
-                            title: "Content"
-                        }
-                        model: _binary
+
                     }
 
-                    ListModel {
-                        id: libraryModel
-                        ListElement {
-                            number: "A Masterpiece"
-                            content: "Gabriel"
-                        }
-                        ListElement {
-                            number: "Brilliance"
-                            content: "Jens"
-                        }
-                        ListElement {
-                            number: "Outstanding"
-                            content: "asdfsfd"
+                    TableViewColumn {
+                        role: "content"
+                        title: "Content"
+                    }
+                    model:listModel
+
+
+                    itemDelegate: Item {
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: styleData.textColor
+                            elide: styleData.elideMode
+                            text: styleData.value
                         }
                     }
+
                 }
             }
             Tab {
