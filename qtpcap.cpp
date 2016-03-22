@@ -2,6 +2,11 @@
 #include <QDebug>
 #include <QApplication>
 #include <netinet/if_ether.h>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
+
 
 
 Qtpcap::Qtpcap(QObject *parent) : QObject(parent)
@@ -44,34 +49,73 @@ Qtpcap::Qtpcap(QObject *parent) : QObject(parent)
 void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u_char* packet)
 {
     Qtpcap* qtpcap = reinterpret_cast<Qtpcap *>(self);
-    u_char *pk = new u_char[pkthdr->caplen];
-    memcpy(pk, packet, pkthdr->caplen);
-    qtpcap->packets.push_back(pk);
+//    u_char *pk = new u_char[pkthdr->caplen];
+//    memcpy(pk, packet, pkthdr->caplen);
+//    qtpcap->packets.push_back(pk);
     qtpcap->packetCount++;
+    ether_header *eptr = (ether_header *) packet;
+    ip *myip = (ip *)packet;
+    qDebug() << inet_ntoa(myip->ip_src);
 
 
-    /*********BINARY*********/
-    QString bstring;
-    QString hstring;
+
+    QString bstring; //binary string
+    QString hstring; //hexadecimal string
+    QJsonObject etherHeader; //ethernet header json object
     for(int n=0; n<int(pkthdr->caplen); ++n){
+        //binary mode
         for(u_char z=0b11111111; z>0; z>>=1){
             bstring += (((*packet & z) == z) ? "1" : "0");
         }
-        hstring += QString("%1").arg(*packet, 0, 16);
+        //hexadecimal mode
+        hstring += QString("%1").arg(*packet, 0, 16).toUpper();
+
+
+        //diagram mode
+//        QJsonObject jsonObj; // assume this has been populated with Json data QJsonValue
+//        jsonObj.insert("a", "aaaaa");
+//        jsonObj.insert("b", jsonObj);
+//        QJsonDocument doc(jsonObj);
+//        QString strJson(doc.toJson(QJsonDocument::Compact));
+//        if(n<6){
+//            etherHeader["destination"] = etherHeader["destination"].toString()
+//                    + QString("%1").arg(*packet, 0, 16).toUpper();
+//        }else if(n<12){
+//            etherHeader["source"] = etherHeader["destination"].toString()
+//                    + QString("%1").arg(*packet, 0, 16).toUpper();
+//        }else if(n<14){
+//        }
+
         packet++;
     }
+
+
+    /*********BINARY*********/
     QString binaryString = "{\"number\":\""+QString::number(qtpcap->packetCount)+"\",\"content\":\""+bstring+"\"}";
     emit(qtpcap->sendBinary(binaryString));
     /**********HEXADECIMAL*********/
     QString hexString = "{\"number\":\""+QString::number(qtpcap->packetCount)+"\",\"content\":\""+hstring+"\"}";
     emit(qtpcap->sendHexadecimal(hexString));
+    /*********DIAGRAM*********/
+    /* check to see if we have an ip packet */
+    etherHeader["destination"] = ether_ntoa((const struct ether_addr *)&eptr->ether_dhost);
+    etherHeader["source"] = ether_ntoa((const struct ether_addr *)&eptr->ether_shost);
+    if (ntohs (eptr->ether_type) == ETHERTYPE_IP){
+        etherHeader["type"] = "IP";
+    }else  if (ntohs (eptr->ether_type) == ETHERTYPE_ARP){
+        etherHeader["type"] = "ARP";
+    }else  if (ntohs (eptr->ether_type) == ETHERTYPE_REVARP){
+        etherHeader["type"] = "RARP";
+    }else {
+        etherHeader["type"] = "UNKNOWN!";
+    }
+    //qDebug() << etherHeader["source"].toString();
 }
 
 void Qtpcap::start()
 {
     int n = pcap_loop(handle,0,(pcap_handler)&Qtpcap::loop_callback,(uchar *)this);
     qDebug() << "this is loop return: " << n;
-
 }
 
 void Qtpcap::stop()

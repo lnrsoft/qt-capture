@@ -174,7 +174,13 @@ ApplicationWindow {
             }
             Tab {
                 title: "Diagram"
-                source: "diagram.qml"
+                //source: "diagram.qml"
+
+
+
+
+
+
             }
             Tab {
                 title: "Tabulation"
