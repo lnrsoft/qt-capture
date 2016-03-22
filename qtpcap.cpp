@@ -6,8 +6,12 @@
 #include <QJsonDocument>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
-
-
+//#include <netinet/if_ether.h>
+//#include <netinet/in.h>
+//#include <stdlib.h>
+#include <net/ethernet.h>
+//#include <netinet/ether.h>
+#include <sys/socket.h>
 
 Qtpcap::Qtpcap(QObject *parent) : QObject(parent)
 {
@@ -54,22 +58,23 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
 //    qtpcap->packets.push_back(pk);
     qtpcap->packetCount++;
     ether_header *eptr = (ether_header *) packet;
+    QJsonObject ipHeader;
     ip *myip = (ip *)packet;
     qDebug() << inet_ntoa(myip->ip_src);
-
-
+    ipHeader["version"] = (myip->ip_v & 0xf0) >> 4;
+    qDebug() << ipHeader["version"].toInt();
 
     QString bstring; //binary string
     QString hstring; //hexadecimal string
     QJsonObject etherHeader; //ethernet header json object
     for(int n=0; n<int(pkthdr->caplen); ++n){
         //binary mode
-        for(u_char z=0b11111111; z>0; z>>=1){
-            bstring += (((*packet & z) == z) ? "1" : "0");
+        for(u_char z=0b10000000; z>0; z>>=1){
+            bstring += (((*packet & z) > 0) ? "1" : "0");
         }
+
         //hexadecimal mode
         hstring += QString("%1").arg(*packet, 0, 16).toUpper();
-
 
         //diagram mode
 //        QJsonObject jsonObj; // assume this has been populated with Json data QJsonValue
@@ -93,6 +98,7 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
     /*********BINARY*********/
     QString binaryString = "{\"number\":\""+QString::number(qtpcap->packetCount)+"\",\"content\":\""+bstring+"\"}";
     emit(qtpcap->sendBinary(binaryString));
+    qDebug() << binaryString;
     /**********HEXADECIMAL*********/
     QString hexString = "{\"number\":\""+QString::number(qtpcap->packetCount)+"\",\"content\":\""+hstring+"\"}";
     emit(qtpcap->sendHexadecimal(hexString));
