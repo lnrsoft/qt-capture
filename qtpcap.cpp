@@ -43,12 +43,28 @@ Qtpcap::Qtpcap(QObject *parent) : QObject(parent)
 
 void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u_char* packet)
 {
-    qDebug() << pkthdr->caplen;
     Qtpcap* qtpcap = reinterpret_cast<Qtpcap *>(self);
     u_char *pk = new u_char[pkthdr->caplen];
     memcpy(pk, packet, pkthdr->caplen);
     qtpcap->packets.push_back(pk);
-    emit(qtpcap->onPacket(pkthdr, packet));
+    qtpcap->packetCount++;
+
+
+    /*********BINARY*********/
+    QString bstring;
+    QString hstring;
+    for(int n=0; n<int(pkthdr->caplen); ++n){
+        for(u_char z=0b11111111; z>0; z>>=1){
+            bstring += (((*packet & z) == z) ? "1" : "0");
+        }
+        hstring += QString("%1").arg(*packet, 0, 16);
+        packet++;
+    }
+    QString binaryString = "{\"number\":\""+QString::number(qtpcap->packetCount)+"\",\"content\":\""+bstring+"\"}";
+    emit(qtpcap->sendBinary(binaryString));
+    /**********HEXADECIMAL*********/
+    QString hexString = "{\"number\":\""+QString::number(qtpcap->packetCount)+"\",\"content\":\""+hstring+"\"}";
+    emit(qtpcap->sendHexadecimal(hexString));
 }
 
 void Qtpcap::start()

@@ -9,6 +9,7 @@ ApplicationWindow {
     height: 680
     title: qsTr("Hello World")
 
+
     Rectangle {
         id: head
         width: parent.width
@@ -22,52 +23,45 @@ ApplicationWindow {
             anchors.right: parent.right
             onClicked: {
                 if(started){
-                    _qtpcap.pcapStop();
+                    _threadPcap.pcapStop();
                     started = false;
                     text = qsTr("Start");
                 }else{
-                    _qtpcap.pcapStart();
+                    _threadPcap.pcapStart();
                     started = true;
                     text = qsTr("Stop");
                 }
             }
-            Connections {
-                target: _qtpcap
-                onSend2qml: {
-                    jsonString = count;
-                }
-            }
-        }
-
-        Button{
-            anchors.fill: parent.Center
-            text: "add row"
-            onClicked: {
-                listModel.append(JSON.parse(jsonString))
-            }
         }
     }
-    property string jsonString: '{"number":"999", "content":"888"}'
 
-    ListModel{
-        id: listModel
-        ListElement{
-            number: "111"
-            content: "aaa"
-        }
-        ListElement{
-            number: "111"
-            content: "aaa"
-        }
-    }
+
 
     Rectangle {
         id: body
         width: parent.width
         height: parent.height - head.height
         y: head.height
-        color: "blue"
-
+        color: "black"
+        Connections {
+            target: _qtpcap
+            onSendBinary: {
+                binaryModel.append(JSON.parse(binaryString))
+            }
+            onSendHexadecimal:{
+                hexadecimalModel.append(JSON.parse(hexString))
+            }
+        }
+        ListModel{
+            id: binaryModel
+    //        ListElement{
+    //            number: "111"
+    //            content: "aaa"
+    //        }
+        }
+        ListModel{
+            id: hexadecimalModel
+        }
         TabView {
             width: parent.width
             height: parent.height
@@ -75,48 +69,108 @@ ApplicationWindow {
                 title: "Binary"
                 //source: "binary.qml"
                 TableView {
+                    backgroundVisible: false
                     //objectName: "binaryTable"
                     anchors.fill: parent
+                    model:binaryModel
 
                     TableViewColumn {
                         role: "number"
                         title: "NO."
                         width: 80
                     }
-                    property bool isRowContChanged: false
-                    onRowCountChanged:{isRowContChanged=true}
+                    TableViewColumn {
+                        width: parent.width-80
+                        role: "content"
+                        title: "Packets Content"
+                    }
+
+                    property bool isRowCountChanged: false
+                    onRowCountChanged:{isRowCountChanged=true}
                     Timer {
                         interval: 500; running: true; repeat: true
                         onTriggered: {
-                            if(parent.isRowContChanged){
-                                positionViewAtRow(rowCount-1, ListView.End)
-                                parent.isRowContChanged = false
+                            if(parent.isRowCountChanged){
+                                positionViewAtRow(rowCount-1, ListView.End);
+                                parent.isRowCountChanged = false;
                             }
                         }
-
                     }
-
-                    TableViewColumn {
-                        role: "content"
-                        title: "Content"
-                    }
-                    model:listModel
-
-
                     itemDelegate: Item {
+                        anchors.fill: parent
                         Text {
+                            anchors.fill: parent
+                            //width: 100
                             anchors.verticalCenter: parent.verticalCenter
-                            color: styleData.textColor
+                            color: "white"
                             elide: styleData.elideMode
+                            //elide: Text.ElideNone
                             text: styleData.value
+                            wrapMode: TextEdit.WrapAnywhere
+                            MouseArea{
+                                anchors.fill: parent
+                                onPressed: color="red"
+                            }
                         }
                     }
-
+                    rowDelegate: Rectangle{
+                        color:"black"
+                        height: 100
+                    }
                 }
             }
             Tab {
                 title: "Hexadecimal"
-                source: "hexadecimal.qml"
+                TableView {
+                    backgroundVisible: false
+                    //objectName: "binaryTable"
+                    anchors.fill: parent
+                    model:hexadecimalModel
+
+                    TableViewColumn {
+                        role: "number"
+                        title: "NO."
+                        width: 80
+                    }
+                    TableViewColumn {
+                        width: parent.width-80
+                        role: "content"
+                        title: "Packets Content"
+                    }
+
+                    property bool isRowCountChanged: false
+                    onRowCountChanged:{isRowCountChanged=true}
+                    Timer {
+                        interval: 500; running: true; repeat: true
+                        onTriggered: {
+                            if(parent.isRowCountChanged){
+                                positionViewAtRow(rowCount-1, ListView.End);
+                                parent.isRowCountChanged = false;
+                            }
+                        }
+                    }
+                    itemDelegate: Item {
+                        anchors.fill: parent
+                        Text {
+                            anchors.fill: parent
+                            //width: 100
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: "white"
+                            elide: styleData.elideMode
+                            //elide: Text.ElideNone
+                            text: styleData.value
+                            wrapMode: TextEdit.WrapAnywhere
+                            MouseArea{
+                                anchors.fill: parent
+                                onPressed: color="red"
+                            }
+                        }
+                    }
+                    rowDelegate: Rectangle{
+                        color:"black"
+                        height: 20
+                    }
+                }
             }
             Tab {
                 title: "Diagram"
