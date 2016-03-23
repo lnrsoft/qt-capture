@@ -98,19 +98,15 @@ ApplicationWindow {
                     }
                     itemDelegate: Item {
                         anchors.fill: parent
-                        Text {
+                        TextEdit {
+                            readOnly: true
+                            selectByMouse: true
                             anchors.fill: parent
-                            //width: 100
                             anchors.verticalCenter: parent.verticalCenter
                             color: "white"
-                            elide: styleData.elideMode
-                            //elide: Text.ElideNone
                             text: styleData.value
+                            //textColor: "white"
                             wrapMode: TextEdit.WrapAnywhere
-                            MouseArea{
-                                anchors.fill: parent
-                                onPressed: color="red"
-                            }
                         }
                     }
                     rowDelegate: Rectangle{
@@ -151,24 +147,19 @@ ApplicationWindow {
                     }
                     itemDelegate: Item {
                         anchors.fill: parent
-                        Text {
+                        TextEdit {
+                            readOnly: true
+                            selectByMouse: true
                             anchors.fill: parent
-                            //width: 100
                             anchors.verticalCenter: parent.verticalCenter
                             color: "white"
-                            elide: styleData.elideMode
-                            //elide: Text.ElideNone
                             text: styleData.value
                             wrapMode: TextEdit.WrapAnywhere
-                            MouseArea{
-                                anchors.fill: parent
-                                onPressed: color="red"
-                            }
                         }
                     }
                     rowDelegate: Rectangle{
                         color:"black"
-                        height: 20
+                        height: 100
                     }
                 }
             }
