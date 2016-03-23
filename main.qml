@@ -1,6 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
-
+import QtQuick.Layouts 1.2
 
 ApplicationWindow {
     id: applicationWindow1
@@ -51,7 +51,21 @@ ApplicationWindow {
             onSendHexadecimal:{
                 hexadecimalModel.append(JSON.parse(hexString))
             }
+            onSendDiagram:{
+                console.log(diaString)
+                jsonModel.append(JSON.parse(diaString));
+            }
         }
+
+
+    JSONListModel{
+        id: jsonModel
+        //json: '[{"etherHeader":{"destination":"c8:3a:35:3a:7f:50","source":"34:36:3b:5e:b1:ba","type":"IP"},"ipHeader":{"checksum":17982,"dest":"54.247.109.184","fragment":64,"headLength":20,"identification":49547,"protocol":6,"source":"192.168.11.101","totalLength":13312,"ttl":64,"type":0,"version":4},"tcpHeader":{"ackNumber":"4FFAF4D5","checksum":13209,"destPort":443,"seqNumber":"C06F31E9","sourcePort":56676,"urgentPoint":0,"windowSize":64783}}]'
+        //json: '[{"label": {"a":"Answer"}, "value": "42"},{"label": {"a":"Alsace"}, "value": "68"}]'
+        //query: "$[?(@.label.charAt(0)==='A')]"
+    }
+
+
         ListModel{
             id: binaryModel
     //        ListElement{
@@ -62,6 +76,13 @@ ApplicationWindow {
         ListModel{
             id: hexadecimalModel
         }
+        ListModel{
+            //id: diagramModel
+                ListElement{
+                    number: "111"
+                }
+        }
+
         TabView {
             width: parent.width
             height: parent.height
@@ -165,13 +186,32 @@ ApplicationWindow {
             }
             Tab {
                 title: "Diagram"
-                //source: "diagram.qml"
+                ListView{
+                    //model: diagramModel
+                    model:jsonModel.model
+                    delegate: Component {
+                        Text {
+                            width: parent.width
+                            horizontalAlignment: Text.AlignLeft
+                            font.pixelSize: 14
+                            color: "white"
+                            text: model.etherHeader.destination
+
+                            Text {
+                                anchors.fill: parent
+                                anchors.rightMargin: 5
+                                horizontalAlignment: Text.AlignRight
+                                font.pixelSize: 12
+                                color: "white"
+                                text: model.etherHeader.destination
+                            }
+                        }
+                    }
 
 
 
 
-
-
+                }
             }
             Tab {
                 title: "Tabulation"
@@ -180,6 +220,8 @@ ApplicationWindow {
             Tab {
                 title: "Textual"
                 source: "textual.qml"
+
+
             }
         }
     }

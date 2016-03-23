@@ -22,3 +22,5 @@ HEADERS += \
 
 LIBS += -lpcap
 
+DISTFILES +=
+

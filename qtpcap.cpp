@@ -65,6 +65,8 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
 //    memcpy(pk, packet, pkthdr->caplen);
 //    qtpcap->packets.push_back(pk);
     qtpcap->packetCount++;
+
+    QJsonObject protoHeader;
     QJsonObject etherHeader; //ethernet header json object
     ether_header *eptr = (ether_header *) packet;
     //6 bytes
@@ -81,6 +83,7 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
     }else {
         etherHeader["type"] = "UNKNOWN!";
     }
+    protoHeader.insert("etherHeader", etherHeader);
 
     QJsonObject ipHeader;
     const ip *myip = (ip*)(packet + 14);
@@ -95,8 +98,7 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
     ipHeader["checksum"] = myip->ip_sum; //2 bytes
     ipHeader["dest"] = inet_ntoa(myip->ip_dst); //4 bytes
     ipHeader["source"] = inet_ntoa(myip->ip_src); //4 bytes
-    //QString strJson(doc.toJson(QJsonDocument::Compact));
-    qDebug() << ipHeader["dest"];
+    protoHeader.insert("ipHeader", ipHeader);
 
     QJsonObject tcpHeader;
     const tcphdr *mytcp = (tcphdr*)(packet+14+myip->ip_hl*4);
@@ -107,11 +109,7 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
     tcpHeader["windowSize"] = mytcp->th_win; //2 bytes
     tcpHeader["checksum"] = mytcp->th_sum; //2 bytes
     tcpHeader["urgentPoint"] = mytcp->th_urp; //2 bytes
-    QJsonDocument doc(tcpHeader);
-
-    QString strJson(doc.toJson(QJsonDocument::Compact));
-    qDebug() << tcpHeader["destPort"];
-
+    protoHeader.insert("tcpHeader", tcpHeader);
 
     QString bstring; //binary string
     QString hstring; //hexadecimal string
@@ -120,7 +118,6 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
         for(u_char z=0b10000000; z>0; z>>=1){
             bstring += (((*packet & z) > 0) ? "1" : "0");
         }
-
         //hexadecimal mode
         hstring += QString("%1").arg(*packet, 0, 16).toUpper();
         packet++;
@@ -134,6 +131,10 @@ void Qtpcap::loop_callback(u_char *self,const struct pcap_pkthdr* pkthdr,const u
     QString hexString = "{\"number\":\""+QString::number(qtpcap->packetCount)+"\",\"content\":\""+hstring+"\"}";
     emit(qtpcap->sendHexadecimal(hexString));
     /*********DIAGRAM*********/
+    QJsonDocument ProtoHeadDoc(protoHeader);
+    QString diagramString(ProtoHeadDoc.toJson(QJsonDocument::Compact));
+    //qDebug() << diagramString;
+    emit(qtpcap->sendDiagram(diagramString));
     /* check to see if we have an ip packet */
 
     //qDebug() << etherHeader["source"].toString();
