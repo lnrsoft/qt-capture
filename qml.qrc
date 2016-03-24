@@ -2,7 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Hexadecimal.qml</file>
-        <file>tabulation.qml</file>
+        <file>Tabulation.qml</file>
         <file>Binary.qml</file>
         <file>Diagram.qml</file>
         <file>textual.qml</file>

@@ -14,7 +14,9 @@ ApplicationWindow {
         id: head
         width: parent.width
         height: 60
-        color: "red"
+        color: "silver"
+        z: 16
+
         Button {
             id: startButton
             property bool started: false
@@ -84,7 +86,7 @@ ApplicationWindow {
             }
             Tab {
                 title: "Tabulation"
-                source: "tabulation.qml"
+                Tabulation{model:diagramModel}
             }
             Tab {
                 title: "Textual"

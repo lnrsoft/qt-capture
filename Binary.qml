@@ -37,18 +37,21 @@ TableView {
             anchors.fill: parent
             anchors.verticalCenter: parent.verticalCenter
             color: "white"
-            text: styleData.value
+            text: {
+                if(styleData.role==="number")return model.number
+                else if(styleData.role==="content")return model.content
+            }
             //textColor: "white"
             wrapMode: TextEdit.WrapAnywhere
             onContentHeightChanged: {
-                console.log("content-height:"+contentHeight+" row:"+styleData.row)
+                //console.log("content-height:"+contentHeight+" row:"+styleData.row)
             }
         }
     }
     rowDelegate: Rectangle{
         color:"black"
         height: {
-            console.log(styleData.row)
+            //console.log(styleData.row)
             return 200
         }
     }
