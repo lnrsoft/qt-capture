@@ -44,6 +44,7 @@ TableView {
             //textColor: "white"
             wrapMode: TextEdit.WrapAnywhere
             onContentHeightChanged: {
+                if(styleData.row>0)myrow.height = contentHeight
                 //console.log("content-height:"+contentHeight+" row:"+styleData.row)
             }
         }
