@@ -31,8 +31,6 @@ int main(int argc, char *argv[])
 
     QObject::connect(qApp, SIGNAL(aboutToQuit()), threadPcap.qtpcap, SLOT(stop()));
 
-
-
     //engine.rootContext()->setContextProperty("_binary", QVariant::fromValue(&ls));
     engine.rootContext()->setContextProperty("_threadPcap", &threadPcap);
     engine.rootContext()->setContextProperty("_qtpcap", threadPcap.qtpcap);

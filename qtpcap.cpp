@@ -12,7 +12,7 @@ Qtpcap::Qtpcap(QObject *parent) : QObject(parent)
     char errbuf[PCAP_ERRBUF_SIZE];
     bpf_u_int32 net;		// Our local IP
     bpf_u_int32 mask;		// Our netmask
-    char filter_exp[] = "port 443";	/* The filter expression */
+    char filter_exp[] = "";	/* The filter expression */
     bpf_program fp;		/* The compiled filter expression */
 
     //The currently active device

@@ -17,6 +17,10 @@ ApplicationWindow {
         color: "silver"
         z: 16
 
+        Label{
+            text: "WHAT'S THE CONTENT RIGHT HERE?"
+        }
+
         Button {
             id: startButton
             property bool started: false
